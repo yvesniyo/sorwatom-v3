@@ -8,6 +8,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class ObjectsUsersRelation
@@ -41,5 +42,39 @@ class ObjectsUsersRelation extends Model
 	public function user()
 	{
 		return $this->belongsTo(User::class);
+	}
+
+
+	public function saveObjectRelationship($object_id, $user_id, $object_type)
+	{
+		$objectRelationship = new ObjectsUsersRelation();
+		$objectRelationship->object_id = $object_id;
+		$objectRelationship->user_id = $user_id;
+		$objectRelationship->object_type = $object_type;
+		$objectRelationship->save();
+
+		return $objectRelationship;
+	}
+
+	public function getObjectByTypeAndId($type, $id)
+	{
+		return $this->where('object_type', $type)
+			->where('object_id', $id)
+			->first();
+	}
+
+	public function getObjectsByUser($object_type, $user_id)
+	{
+		return $this->where('object_type', $object_type)
+			->where('user_id', $user_id)
+			->get();
+	}
+
+	public function getActivitiesByUser($user_id)
+	{
+		return $this->select('*', DB::raw('count(*) as c'))
+			->where('user_id', $user_id)
+			->groupBy('object_type')
+			->get();
 	}
 }

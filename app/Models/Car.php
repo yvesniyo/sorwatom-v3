@@ -43,4 +43,31 @@ class Car extends Model
 	{
 		return $this->hasMany(LoadedOrder::class);
 	}
+
+	public function getCars()
+    {
+        return $this->where('status', 1)->get();
+    }
+
+    public function getCarById($carId)
+    {
+        return $this->where('car_id', $carId)->where('status', 1)->get();
+    }
+
+    // You can add more methods for other functionalities here
+
+    public function getConfirmedOrderById(int $id)
+    {
+        // You will need to define the relationships between models and query the related data
+        $confirmedOrder = ConfirmedOrder::find($id);
+
+        if ($confirmedOrder) {
+            $confirmedOrder->billing = $confirmedOrder->getBillingForOrder();
+            $confirmedOrder->delivery = $confirmedOrder->getDeliveryForOrder();
+            $confirmedOrder->products_ordered = $confirmedOrder->getProductsForOrder();
+            return $confirmedOrder;
+        }
+
+        return null;
+    }
 }

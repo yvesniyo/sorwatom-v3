@@ -48,4 +48,29 @@ class Payment extends Model
 	{
 		return $this->belongsTo(User::class, 'added_by');
 	}
+
+
+	public function savePayment(int $customer_id, string $proofs, int $added_by)
+	{
+		$payment = new Payment();
+		$payment->customer_id = $customer_id;
+		$payment->proofs = $proofs;
+		$payment->added_by = $added_by;
+		$payment->date_creation = now();
+		$payment->save();
+
+		return $payment;
+	}
+
+	public function getPayments()
+	{
+		return Payment::all();
+	}
+
+	public function getPaymentsForCustomer(int $customer_id)
+	{
+		return Payment::where('customer_id', $customer_id)
+			->orderBy('date_creation', 'desc')
+			->get();
+	}
 }

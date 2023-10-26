@@ -42,4 +42,41 @@ class Delegate extends Model
 	{
 		return $this->belongsTo(User::class);
 	}
+
+
+	public function saveDelegate(int $user_id, $roles)
+    {
+        $delegate = new Delegate();
+        $delegate->user_id = $user_id;
+        $delegate->roles = $roles;
+        $delegate->status = 1;
+        $delegate->save();
+
+        return $delegate;
+    }
+
+    public function getUserRoles(int $user_id)
+    {
+        $delegate = $this->where('user_id', $user_id)->first();
+
+        if ($delegate) {
+            return $delegate->roles;
+        }
+
+        return null;
+    }
+
+    public function updateRoles(int $user_id, $value)
+    {
+        $delegate = $this->where('user_id', $user_id)->first();
+
+        if ($delegate) {
+            $delegate->roles = $value;
+            $delegate->save();
+
+            return true;
+        }
+
+        return false;
+    }
 }

@@ -63,4 +63,43 @@ class Competitor extends Model
 	{
 		return $this->hasMany(CompetitorsProduct::class);
 	}
+
+
+
+	public function getAllByCountry(string $country)
+	{
+		return $this->where('country_code', $country)->get();
+	}
+
+	public function getAllCompetitors()
+	{
+		return $this->get();
+	}
+
+	public function getAllCompetitorsById(int $id)
+	{
+		return $this->where('id', $id)->get();
+	}
+
+	public function saveCompetitor(array $data)
+	{
+		return $this->create($data);
+	}
+
+	public function generalUpdate(int $id, array $attrs)
+	{
+		return $this->where('id', $id)->update($attrs);
+	}
+
+	public function getAllByUser(int $user)
+	{
+		return $this->where('added_by', $user)->get();
+	}
+
+	public function getAllByUserAndCountry(int $user, string $country_code)
+	{
+		return $this->where('added_by', $user)
+			->where("country_code", $country_code)
+			->get();
+	}
 }

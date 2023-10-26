@@ -54,4 +54,45 @@ class Delivery extends Model
 	{
 		return $this->belongsTo(Order::class);
 	}
+
+	public function saveDelivery($order_id, $province, $district, $street, $receiver_name, $status)
+    {
+        $delivery = new Delivery();
+        $delivery->order_id = $order_id;
+        $delivery->province = $province;
+        $delivery->district = $district;
+        $delivery->street = $street;
+        $delivery->receiver_name = $receiver_name;
+        $delivery->quantity = 0; // You can set the initial quantity as needed
+        $delivery->status = $status;
+        $delivery->created_date = now();
+        $delivery->delivery_date = null;
+        $delivery->save();
+
+        return $delivery;
+    }
+
+    public function getDeliveryForOrder(int $order_id)
+    {
+        return $this->where('order_id', $order_id)->get();
+    }
+
+    public function updateDeliveryStatus(int $order_id,int $status)
+    {
+        $delivery = $this->where('order_id', $order_id)->first();
+
+        if ($delivery) {
+            $delivery->status = $status;
+
+            if ($status == 1) {
+                $delivery->delivery_date = now();
+            }
+
+            $delivery->save();
+
+            return true;
+        }
+
+        return false;
+    }
 }

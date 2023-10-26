@@ -79,4 +79,77 @@ class Product extends Model
 	{
 		return $this->hasMany(StockRequest::class);
 	}
+
+
+
+	public function objectRelationship()
+    {
+        return $this->hasMany(ObjectRelationship::class, 'object_id')->where('object_type', 'product');
+    }
+
+    public function sorwatomProducts()
+    {
+        return $this->belongsToMany(SorwatomProduct::class, 'sorwatom_products', 'product_id', 'id');
+    }
+
+    public function updateField($field, $value)
+    {
+        $this->$field = $value;
+        return $this->save();
+    }
+
+    public static function updateGeneral($attrs)
+    {
+        $product = self::find($attrs['id']);
+        if ($product) {
+            foreach ($attrs as $field => $value) {
+                $product->$field = $value;
+            }
+            return $product->save();
+        }
+
+        return false;
+    }
+
+    public static function getProductById($id)
+    {
+        return self::find($id);
+    }
+
+    public static function getProductByIdName($id)
+    {
+        return self::find($id, ['name']);
+    }
+
+    public static function getProductByIdPrice($id)
+    {
+        return self::find($id, ['price']);
+    }
+
+    public static function getAllProducts()
+    {
+        return self::orderBy('date_creation', 'ASC')->get();
+    }
+
+    public function saveProduct($user_id)
+    {
+        $this->added_by = $user_id;
+        return $this->save();
+    }
+
+    public function addSorwatomProduct()
+    {
+        $this->save();
+        $sorwatomProduct = new SorwatomProduct();
+        $sorwatomProduct->product_id = $this->id;
+        return $sorwatomProduct->save();
+    }
+
+    public static function getSorwatomProducts()
+    {
+        return self::select('products.*', 'sorwatom_products.product_id')
+            ->join('sorwatom_products', 'products.id', '=', 'sorwatom_products.product_id')
+            ->orderBy('date_creation')
+            ->get();
+    }
 }

@@ -39,4 +39,19 @@ class DeviceBelonging extends Model
 	{
 		return $this->belongsTo(User::class);
 	}
+
+	public function getUserDevice(int $user_id)
+	{
+		return $this->where('user_id', $user_id)->first();
+	}
+
+	public function saveDeviceBelonging($device_id, int $user_id)
+	{
+		$deviceBelonging = new DeviceBelonging();
+		$deviceBelonging->device_id = $device_id;
+		$deviceBelonging->user_id = $user_id;
+		$deviceBelonging->save();
+
+		return $deviceBelonging;
+	}
 }

@@ -49,4 +49,38 @@ class LoadedOrder extends Model
 	{
 		return $this->belongsTo(Car::class);
 	}
+
+
+	public function saveLoadedOrder($confirmed_order_id, $car_id, $driver_id)
+	{
+		$loadedOrder = new LoadedOrder();
+		$loadedOrder->confirmed_order_id = $confirmed_order_id;
+		$loadedOrder->car_id = $car_id;
+		$loadedOrder->driver_id = $driver_id;
+		$loadedOrder->save();
+
+		return $loadedOrder;
+	}
+
+	public function getLoadedOrders()
+	{
+		return $this->join('orders', 'orders.id', '=', 'loaded_order.confirmed_order_id')
+			->select('loaded_order.*')
+			->get();
+	}
+
+	public function getLoadedOrderByOrderID($order_id)
+	{
+		return $this->join('orders', 'orders.id', '=', 'loaded_order.confirmed_order_id')
+			->select('loaded_order.*')
+			->where('orders.id', $order_id)
+			->get();
+	}
+
+	public function getLoadedCarByOrderID($order_id)
+	{
+		return $this->where('confirmed_order_id', $order_id)
+			->select('car_id')
+			->get();
+	}
 }

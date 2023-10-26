@@ -44,4 +44,30 @@ class Note extends Model
 	{
 		return $this->belongsTo(User::class, 'added_by');
 	}
+
+
+	public function saveNote($comment, $type, $object_id, $added_by)
+	{
+		$note = new Note();
+		$note->comment = $comment;
+		$note->type = $type;
+		$note->object_id = $object_id;
+		$note->added_by = $added_by;
+		$note->save();
+
+		return $note;
+	}
+
+	public function getNotes()
+	{
+		return $this->get();
+	}
+
+	public function getNotesForCustomer($customer_id)
+	{
+		return $this->where('type', 'customer_note')
+			->where('object_id', $customer_id)
+			->orderBy('date_creation', 'DESC')
+			->get();
+	}
 }
