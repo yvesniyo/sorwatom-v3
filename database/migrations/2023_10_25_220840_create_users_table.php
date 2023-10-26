@@ -28,6 +28,8 @@ class CreateUsersTable extends Migration
             $table->text('image');
             $table->string('whatsapp_number');
             $table->unsignedBigInteger('country_id');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
             $table->timestamps();
             
             $table->foreign('country_id', 'users_ibfk_1')->references('id')->on('countries');
