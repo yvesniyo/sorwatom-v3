@@ -48,4 +48,44 @@ class Activity extends Model
 	{
 		return $this->belongsTo(User::class);
 	}
+
+
+	public function scopeByUserId($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    public function scopeByDates($query, $start, $end)
+    {
+        return $query->whereBetween('date_creation', [$start, $end]);
+    }
+
+    public function scopeWithoutGps($query)
+    {
+        return $query->where('action', '<>', 'gps');
+    }
+
+    public function scopeWithoutLogin($query)
+    {
+        return $query->where('action', '<>', 'login');
+    }
+
+    public function scopeTodayUserWaypoints($query, $userId)
+    {
+        $date = now()->toDateString();
+        return $query->where('user_id', $userId)
+            ->whereDate('date_creation', $date)
+            ->orderBy('id');
+    }
+
+    public function countUserActivities($userId, $start = null, $end = null)
+    {
+        $query = $this->byUserId($userId);
+
+        if ($start && $end) {
+            $query = $query->byDates($start, $end);
+        }
+
+        return $query->withoutGps()->count();
+    }
 }
