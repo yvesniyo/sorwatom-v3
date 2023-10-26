@@ -49,4 +49,21 @@ class Billing extends Model
 	{
 		return $this->belongsTo(Order::class);
 	}
+
+
+	public function getBillingForOrder(int $order_id)
+	{
+		return $this->where('order_id', $order_id)->get();
+	}
+
+	public function saveBilling(int $order_id, string $company, string $tin, string $name, int $status)
+	{
+		return $this->create([
+			'order_id' => $order_id,
+			'company' => $company,
+			'tin' => $tin,
+			'name' => $name,
+			'status' => $status,
+		]);
+	}
 }
