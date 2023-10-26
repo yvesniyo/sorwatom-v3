@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * 
  * @property Customer $customer
  * @property User $user
- * @property Collection|Billing[] $billings
+ * @property Billing $billing
  * @property Collection|Delivery[] $deliveries
  * @property Collection|Product[] $products
  *
@@ -63,11 +63,6 @@ class Order extends Model
 		return $this->belongsTo(User::class, 'modified_by');
 	}
 
-	public function billings()
-	{
-		return $this->hasMany(Billing::class);
-	}
-
 	public function deliveries()
 	{
 		return $this->hasMany(Delivery::class);
@@ -79,4 +74,95 @@ class Order extends Model
 					->withPivot('id', 'qty', 'price')
 					->withTimestamps();
 	}
+
+
+	public function productsOrdered()
+    {
+        return $this->hasMany(ProductOrdered::class);
+    }
+
+    public function billing()
+    {
+        return $this->hasOne(Billing::class);
+    }
+
+    public function delivery()
+    {
+        return $this->hasOne(Delivery::class);
+    }
+
+    public function objectRelationship()
+    {
+        return $this->hasOne(ObjectRelationship::class, 'object_id')->where('object_type', 'order');
+    }
+
+    public function saveOrder($client, $status, $addedBy, $modifiedBy)
+    {
+        $order = new Order();
+        $order->client = $client;
+        $order->date = now();
+        $order->status = $status;
+        $order->amount = 0; // Calculate the amount as needed
+        $order->added_by = $addedBy;
+        $order->modified_by = $modifiedBy;
+        $order->save();
+
+        return $order;
+    }
+
+    public function getOrders()
+    {
+        return Order::with(['billing', 'delivery', 'productsOrdered'])->orderBy('id', 'DESC')->get();
+    }
+
+    // Implement other methods to get orders by date, for a specific country, etc.
+
+    public function countPendingOrders()
+    {
+        return $this->where('status', 0)->count();
+    }
+
+    // Implement other count methods
+
+    public function getOrderById($id)
+    {
+        return Order::with(['billing', 'delivery', 'productsOrdered'])->find($id);
+    }
+
+    public function getTodaysOrders()
+    {
+        return Order::with(['billing', 'delivery', 'productsOrdered'])
+            ->whereDate('date', today())
+            ->orderBy('id', 'DESC')
+            ->get();
+    }
+
+    // Implement other order retrieval methods
+
+    public function updateOrderStatus($field, $value)
+    {
+        return $this->update([$field => $value]);
+    }
+
+    public function getOrdersForCustomer($customerId, $limit = 1)
+    {
+        return Order::with(['billing', 'delivery', 'productsOrdered'])
+            ->where('client', $customerId)
+            ->orderBy('id', 'DESC')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function getOrdersByUser($userId)
+    {
+        return Order::with(['productsOrdered' => function ($query) {
+            $query->select('product_ordered_id', 'product_id', 'order_id', 'qty');
+        }])
+        ->whereHas('objectRelationship', function ($query) use ($userId) {
+            $query->where('user_id', $userId)->where('object_type', 'order');
+        })
+        ->where('date', '>=', now()->subDay())
+        ->orderBy('client')
+        ->get();
+    }
 }
